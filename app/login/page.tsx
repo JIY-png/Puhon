@@ -19,7 +19,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const { login } = useAuth()
 
-  const redirect = searchParams.get("redirect") || "/dashboard"
+  const redirect = searchParams.get("redirect") || "/admin"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,10 +64,10 @@ export default function LoginPage() {
               />
             </div>
             <CardTitle className="text-2xl font-bold">
-              <span className="text-gold-gradient">PUHON</span> Family Login
+              <span className="text-gold-gradient">PUHON</span> Admin Login
             </CardTitle>
             <CardDescription>
-              Enter your credentials to access member features
+              Leader, Deputy, and Admin accounts only
             </CardDescription>
           </CardHeader>
 
@@ -144,11 +144,11 @@ export default function LoginPage() {
                 </Link>
               </p>
               <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-2">Demo credentials:</p>
+                <p className="text-xs text-muted-foreground mb-2">Demo admin credentials:</p>
                 <div className="text-xs space-y-1">
-                  <p><span className="font-bold">Admin:</span> admin / admin123</p>
-                  <p><span className="font-bold">Member:</span> crystalfang / crystal123</p>
-                  <p><span className="font-bold">Member:</span> shadow / shadow123</p>
+                  <p><span className="font-bold">Leader:</span> admin / admin123</p>
+                  <p><span className="font-bold">Deputy:</span> crystalfang / crystal123</p>
+                  <p><span className="font-bold">Admin:</span> shadow / shadow123</p>
                 </div>
               </div>
             </div>

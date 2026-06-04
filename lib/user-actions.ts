@@ -37,13 +37,6 @@ export async function removeUser(id: string) {
   revalidatePath("/admin/members")
 }
 
-// Allow members to update their own password/profile
-export async function updateSelf(id: string, userData: Partial<Omit<User, "id" | "joinDate" | "createdAt" | "updatedAt">>) {
-  const user = await updateUser(id, userData)
-  revalidatePath("/dashboard/profile")
-  return user
-}
-
 // Public function to get all users without admin check
 export async function getPublicUsers() {
   return getUsers()

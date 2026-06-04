@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { Menu, X, Crown, LogIn, LogOut, LayoutDashboard, Shield } from "lucide-react"
+import { Menu, X, LogIn, LogOut, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/components/auth-provider"
 
@@ -19,7 +19,7 @@ const publicNavigation = [
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
-  const { isAuthenticated, isAdmin, logout, isLoading } = useAuth()
+  const { isAdmin, logout, isLoading } = useAuth()
 
   const handleLogout = async () => {
     await logout()
@@ -30,17 +30,15 @@ export function Navigation() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <img 
-              src="/Puhon_logo.png" 
-              alt="PUHON Logo" 
+            <img
+              src="/Puhon_logo.png"
+              alt="PUHON Logo"
               className="w-10 h-10 rounded-lg object-contain group-hover:scale-105 transition-transform"
             />
             <span className="text-xl font-bold text-gold-gradient">PUHON</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             {publicNavigation.map((item) => (
               <Link
@@ -55,24 +53,15 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
             {!isLoading && (
               <>
-                {isAuthenticated ? (
+                {isAdmin ? (
                   <>
-                    {isAdmin && (
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href="/admin">
-                          <Shield className="w-4 h-4 mr-2" />
-                          Admin
-                        </Link>
-                      </Button>
-                    )}
                     <Button variant="outline" size="sm" asChild>
-                      <Link href="/dashboard">
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Dashboard
+                      <Link href="/admin">
+                        <Shield className="w-4 h-4 mr-2" />
+                        Admin
                       </Link>
                     </Button>
                     <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -81,10 +70,10 @@ export function Navigation() {
                     </Button>
                   </>
                 ) : (
-                  <Button size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild>
                     <Link href="/login">
                       <LogIn className="w-4 h-4 mr-2" />
-                      Member Login
+                      Admin Login
                     </Link>
                   </Button>
                 )}
@@ -92,7 +81,6 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2 text-muted-foreground hover:text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -101,7 +89,6 @@ export function Navigation() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-2">
@@ -122,25 +109,15 @@ export function Navigation() {
               <div className="border-t border-border mt-2 pt-2">
                 {!isLoading && (
                   <>
-                    {isAuthenticated ? (
+                    {isAdmin ? (
                       <>
-                        {isAdmin && (
-                          <Link
-                            href="/admin"
-                            className="flex items-center px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-lg"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <Shield className="w-4 h-4 mr-2" />
-                            Admin Panel
-                          </Link>
-                        )}
                         <Link
-                          href="/dashboard"
+                          href="/admin"
                           className="flex items-center px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-lg"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          <LayoutDashboard className="w-4 h-4 mr-2" />
-                          Dashboard
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin Panel
                         </Link>
                         <button
                           className="flex items-center w-full px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-lg"
@@ -160,7 +137,7 @@ export function Navigation() {
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <LogIn className="w-4 h-4 mr-2" />
-                        Member Login
+                        Admin Login
                       </Link>
                     )}
                   </>

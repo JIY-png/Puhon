@@ -1,33 +1,33 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { login as serverLogin, logout as serverLogout, getAuthRole, getCurrentUser, type UserRole } from "@/lib/auth"
-import type { User } from "@/lib/users"
+import { login as serverLogin, logout as serverLogout, getAuthRole, getCurrentUser } from "@/lib/auth"
+import type { User, UserRole } from "@/lib/users"
+
+const ADMIN_ROLES: UserRole[] = ["Leader", "Deputies", "Admins"]
 
 interface AuthContextType {
-  role: UserRole
+  role: UserRole | null
   isLoading: boolean
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   isAuthenticated: boolean
   isAdmin: boolean
-  isMember: boolean
   user: User | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<UserRole>("guest")
+  const [role, setRole] = useState<UserRole | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
 
-  // Initialize auth state on mount
   useEffect(() => {
     const initAuth = async () => {
-      const [role, user] = await Promise.all([getAuthRole(), getCurrentUser()])
-      setRole(role)
-      setUser(user)
+      const [authRole, currentUser] = await Promise.all([getAuthRole(), getCurrentUser()])
+      setRole(authRole)
+      setUser(currentUser)
       setIsLoading(false)
     }
     initAuth()
@@ -47,10 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     setIsLoading(true)
     await serverLogout()
-    setRole("guest")
+    setRole(null)
     setUser(null)
     setIsLoading(false)
   }
+
+  const isAdmin = role !== null && ADMIN_ROLES.includes(role)
 
   return (
     <AuthContext.Provider
@@ -59,9 +61,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         logout,
-        isAuthenticated: role !== "guest",
-        isAdmin: role === "admin",
-        isMember: role === "member" || role === "admin",
+        isAuthenticated: isAdmin && user !== null,
+        isAdmin,
         user,
       }}
     >

@@ -8,7 +8,6 @@ import {
   Users,
   Gamepad2,
   ChevronDown,
-  LogIn,
   MapPin,
   Trophy,
   Mic,
@@ -180,9 +179,8 @@ function EventCard({ event, isPast = false }: { event: GameEvent; isPast?: boole
         {!isPast && (
           <div className="mt-4">
             <Button variant="outline" size="sm" className="w-full" asChild>
-              <Link href="/login?redirect=/dashboard/events">
-                <LogIn className="w-4 h-4 mr-2" />
-                Login to RSVP
+              <Link href="/join">
+                Join to RSVP
               </Link>
             </Button>
           </div>
