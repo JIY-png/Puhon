@@ -3,11 +3,10 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthProvider } from "@/components/auth-provider"
-import { getAuthRole } from "@/lib/auth"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
 
 export const metadata: Metadata = {
   title: "PUHON | WePlay Family",
@@ -24,12 +23,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const initialRole = await getAuthRole()
-  
   return (
     <html lang="en" className="bg-background">
-      <body className={`font-sans antialiased`}>
-        <AuthProvider initialRole={initialRole}>
+      <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
+        <AuthProvider>
           {children}
         </AuthProvider>
         <Analytics />

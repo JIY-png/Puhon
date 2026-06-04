@@ -1,4 +1,4 @@
-import { supabase } from "./supabase"
+import { supabase, supabaseAdmin } from "./supabase"
 
 export type UserRole = "Leader" | "Deputies" | "Admins" | "Members"
 
@@ -18,93 +18,79 @@ export interface User {
   updatedAt?: string
 }
 
-// Get all users from Supabase
-export async function getUsers(): Promise<User[]> {
+export type PublicUser = Omit<User, "password">
+
+// Columns safe to expose publicly (excludes password)
+const PUBLIC_COLUMNS = "id, username, display_name, role, weplay_id, level, favorite_game, status, badges, join_date, created_at, updated_at"
+
+// All columns including password (for auth only)
+const ALL_COLUMNS = "id, username, display_name, password, role, weplay_id, level, favorite_game, status, badges, join_date, created_at, updated_at"
+
+function mapUser(data: Record<string, unknown>): User {
+  return {
+    id: data.id as string,
+    username: data.username as string,
+    displayName: data.display_name as string,
+    password: (data.password as string) || "",
+    role: data.role as UserRole,
+    weplayId: data.weplay_id as string | undefined,
+    level: data.level as number | undefined,
+    favoriteGame: data.favorite_game as string | undefined,
+    status: data.status as string | undefined,
+    badges: data.badges as string[] | undefined,
+    joinDate: data.join_date as string | undefined,
+    createdAt: data.created_at as string | undefined,
+    updatedAt: data.updated_at as string | undefined,
+  }
+}
+
+// Get all users (public view - no passwords exposed)
+export async function getUsers(): Promise<PublicUser[]> {
   const { data, error } = await supabase
     .from("users")
-    .select("*")
+    .select(PUBLIC_COLUMNS)
     .order("role", { ascending: false })
 
   if (error) throw error
 
-  return data.map((user) => ({
-    id: user.id,
-    username: user.username,
-    displayName: user.display_name,
-    password: user.password,
-    role: user.role,
-    weplayId: user.weplay_id,
-    level: user.level,
-    favoriteGame: user.favorite_game,
-    status: user.status,
-    badges: user.badges,
-    joinDate: user.join_date,
-    createdAt: user.created_at,
-    updatedAt: user.updated_at,
-  }))
+  return data.map((u: Record<string, unknown>) => {
+    const user = mapUser(u)
+    const { password: _, ...safeUser } = user
+    return safeUser
+  })
 }
 
-// Get user by ID
+// Get user by ID (full record including password, for server-side auth)
 export async function getUserById(id: string): Promise<User | null> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("users")
-    .select("*")
+    .select(ALL_COLUMNS)
     .eq("id", id)
-    .single()
+    .maybeSingle()
 
   if (error) throw error
-
   if (!data) return null
 
-  return {
-    id: data.id,
-    username: data.username,
-    displayName: data.display_name,
-    password: data.password,
-    role: data.role,
-    weplayId: data.weplay_id,
-    level: data.level,
-    favoriteGame: data.favorite_game,
-    status: data.status,
-    badges: data.badges,
-    joinDate: data.join_date,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-  }
+  return mapUser(data as Record<string, unknown>)
 }
 
-// Get user by username
+// Get user by username (full record including password, for server-side auth)
 export async function getUserByUsername(username: string): Promise<User | null> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("users")
-    .select("*")
+    .select(ALL_COLUMNS)
     .eq("username", username)
-    .single()
+    .maybeSingle()
 
   if (error) throw error
-
   if (!data) return null
 
-  return {
-    id: data.id,
-    username: data.username,
-    displayName: data.display_name,
-    password: data.password,
-    role: data.role,
-    weplayId: data.weplay_id,
-    level: data.level,
-    favoriteGame: data.favorite_game,
-    status: data.status,
-    badges: data.badges,
-    joinDate: data.join_date,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-  }
+  return mapUser(data as Record<string, unknown>)
 }
 
-// Add new user
+// Add new user (server-side only, uses admin client)
 export async function addUser(user: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<User> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("users")
     .insert({
       username: user.username,
@@ -118,69 +104,43 @@ export async function addUser(user: Omit<User, "id" | "createdAt" | "updatedAt">
       badges: user.badges,
       join_date: user.joinDate || new Date().toISOString().split("T")[0],
     })
-    .select()
+    .select(ALL_COLUMNS)
     .single()
 
   if (error) throw error
 
-  return {
-    id: data.id,
-    username: data.username,
-    displayName: data.display_name,
-    password: data.password,
-    role: data.role,
-    weplayId: data.weplay_id,
-    level: data.level,
-    favoriteGame: data.favorite_game,
-    status: data.status,
-    badges: data.badges,
-    joinDate: data.join_date,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-  }
+  return mapUser(data as Record<string, unknown>)
 }
 
-// Update user
+// Update user (server-side only, uses admin client)
 export async function updateUser(
   id: string,
   userData: Partial<Omit<User, "id" | "createdAt" | "updatedAt">>
 ): Promise<User> {
-  const { data, error } = await supabase
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  }
+  if (userData.username !== undefined) updateData.username = userData.username
+  if (userData.displayName !== undefined) updateData.display_name = userData.displayName
+  if (userData.password !== undefined) updateData.password = userData.password
+  if (userData.role !== undefined) updateData.role = userData.role
+  if (userData.weplayId !== undefined) updateData.weplay_id = userData.weplayId
+  if (userData.level !== undefined) updateData.level = userData.level
+  if (userData.favoriteGame !== undefined) updateData.favorite_game = userData.favoriteGame
+  if (userData.status !== undefined) updateData.status = userData.status
+  if (userData.badges !== undefined) updateData.badges = userData.badges
+  if (userData.joinDate !== undefined) updateData.join_date = userData.joinDate
+
+  const { data, error } = await supabaseAdmin
     .from("users")
-    .update({
-      username: userData.username,
-      display_name: userData.displayName,
-      password: userData.password,
-      role: userData.role,
-      weplay_id: userData.weplayId,
-      level: userData.level,
-      favorite_game: userData.favoriteGame,
-      status: userData.status,
-      badges: userData.badges,
-      join_date: userData.joinDate,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq("id", id)
-    .select()
+    .select(ALL_COLUMNS)
     .single()
 
   if (error) throw error
 
-  return {
-    id: data.id,
-    username: data.username,
-    displayName: data.display_name,
-    password: data.password,
-    role: data.role,
-    weplayId: data.weplay_id,
-    level: data.level,
-    favoriteGame: data.favorite_game,
-    status: data.status,
-    badges: data.badges,
-    joinDate: data.join_date,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-  }
+  return mapUser(data as Record<string, unknown>)
 }
 
 // Verify credentials for login
@@ -192,8 +152,6 @@ export async function verifyCredentials(
 
   if (!user) return null
 
-  // NOTE: In production, you should hash passwords with bcrypt!
-  // For demo purposes, we're checking plain text
   if (user.password === password) {
     return user
   }
@@ -201,8 +159,8 @@ export async function verifyCredentials(
   return null
 }
 
-// Delete user
+// Delete user (server-side only, uses admin client)
 export async function deleteUser(id: string): Promise<void> {
-  const { error } = await supabase.from("users").delete().eq("id", id)
+  const { error } = await supabaseAdmin.from("users").delete().eq("id", id)
   if (error) throw error
 }

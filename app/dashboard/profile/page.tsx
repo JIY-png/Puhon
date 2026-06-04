@@ -81,21 +81,34 @@ export default function ProfilePage() {
   const handlePasswordChange = async () => {
     if (!user) return
 
+    if (!passwordData.currentPassword) {
+      alert("Please enter your current password")
+      return
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert("Passwords don't match!")
       return
     }
 
-    await updateSelf(user.id, { password: passwordData.newPassword })
+    if (passwordData.newPassword.length < 4) {
+      alert("New password must be at least 4 characters")
+      return
+    }
 
-    setIsChangingPassword(false)
-    setPasswordSaved(true)
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    })
-    setTimeout(() => setPasswordSaved(false), 3000)
+    try {
+      await updateSelf(user.id, { password: passwordData.newPassword })
+      setIsChangingPassword(false)
+      setPasswordSaved(true)
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      })
+      setTimeout(() => setPasswordSaved(false), 3000)
+    } catch (err) {
+      alert("Failed to update password: " + (err instanceof Error ? err.message : "Unknown error"))
+    }
   }
 
   const handleCancel = () => {

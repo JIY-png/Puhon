@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Crown, Eye, EyeOff, LogIn, ArrowLeft, User } from "lucide-react"
 import Link from "next/link"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/components/auth-provider"
 
-export default function LoginPage() {
+function LoginForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -40,13 +40,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      {/* Background pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
-      
+
       <div className="relative w-full max-w-md">
-        {/* Back to home */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -55,11 +53,10 @@ export default function LoginPage() {
 
         <Card className="border-border/50 bg-card/50 backdrop-blur">
           <CardHeader className="text-center pb-2">
-            {/* Logo */}
             <div className="mx-auto w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/30 mb-4">
-              <img 
-                src="/Puhon_logo.png" 
-                alt="PUHON Logo" 
+              <img
+                src="/Puhon_logo.png"
+                alt="PUHON Logo"
                 className="w-8 h-8 object-contain"
               />
             </div>
@@ -160,5 +157,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

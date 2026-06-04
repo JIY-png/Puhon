@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export function proxy(request: NextRequest) {
-  const authCookie = request.cookies.get("puhon-auth")
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const userId = request.cookies.get("puhon-user-id")?.value
+  const userRole = request.cookies.get("puhon-user-role")?.value
 
-  // Admin routes - require admin role
+  // Admin routes - require Leader, Deputies, or Admins role
   if (pathname.startsWith("/admin")) {
-    if (authCookie?.value !== "admin") {
+    if (!userId || !userRole || !["Leader", "Deputies", "Admins"].includes(userRole)) {
       return NextResponse.redirect(new URL("/login?redirect=" + pathname, request.url))
     }
   }
 
-  // Dashboard routes - require member or admin role
+  // Dashboard routes - require any authenticated user
   if (pathname.startsWith("/dashboard")) {
-    if (!authCookie || (authCookie.value !== "member" && authCookie.value !== "admin")) {
+    if (!userId) {
       return NextResponse.redirect(new URL("/login?redirect=" + pathname, request.url))
     }
   }

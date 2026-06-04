@@ -48,8 +48,8 @@ import {
   Crown,
   Users,
 } from "lucide-react"
-import type { User, UserRole } from "@/lib/users"
-import { getAllUsers, addUser, editUser, removeUser } from "@/lib/user-actions"
+import type { PublicUser, UserRole } from "@/lib/users"
+import { getAllUsers, createUser, editUser, removeUser } from "@/lib/user-actions"
 
 const allRoles: UserRole[] = ["Leader", "Deputies", "Admins", "Members"]
 
@@ -61,12 +61,12 @@ const roleConfig: Record<UserRole, { icon: typeof Crown; color: string; bg: stri
 }
 
 export default function MembersPage() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<PublicUser[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState<string>("All")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [editingUser, setEditingUser] = useState<PublicUser | null>(null)
   const [newUser, setNewUser] = useState({
     username: "",
     displayName: "",
@@ -102,7 +102,7 @@ export default function MembersPage() {
 
   const handleAddUser = async () => {
     try {
-      await addUser(newUser)
+      await createUser(newUser)
       // Refresh the list
       const data = await getAllUsers()
       setUsers(data)
@@ -157,7 +157,7 @@ export default function MembersPage() {
     }
   }
 
-  const openEditDialog = (user: User) => {
+  const openEditDialog = (user: PublicUser) => {
     setEditingUser(user)
     setNewUser({
       username: user.username,
@@ -167,7 +167,7 @@ export default function MembersPage() {
  weplayId: user.weplayId || "",
       level: user.level || 1,
       favoriteGame: user.favoriteGame || "",
-      status: user.status || "offline",
+      status: (user.status as "online" | "offline" | "in-game") || "offline",
     })
     setIsEditDialogOpen(true)
   }
@@ -622,7 +622,7 @@ export default function MembersPage() {
                         <div>
                           <p className="font-medium text-foreground">{user.displayName}</p>
                           <p className="text-xs text-muted-foreground">
-                            Joined: {new Date(user.joinDate).toLocaleDateString()}
+                            Joined: {user.joinDate ? new Date(user.joinDate).toLocaleDateString() : "N/A"}
                           </p>
                         </div>
                       </div>
