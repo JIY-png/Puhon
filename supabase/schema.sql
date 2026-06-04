@@ -18,23 +18,46 @@ CREATE TABLE users (
 -- Create index on username for faster lookups
 CREATE INDEX idx_users_username ON users(username);
 
--- Enable Row Level Security (RLS)
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+-- Demo app uses custom cookie auth, not Supabase Auth.
+-- RLS with overlapping policies causes infinite recursion (Postgres 42P17) on login.
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 
--- Create policy for all users to view all users (for now)
-CREATE POLICY "Users can view all users"
-  ON users
-  FOR SELECT
-  USING (true);
+-- For production: enable RLS with Supabase Auth + scoped policies, or use
+-- SUPABASE_SERVICE_ROLE_KEY only on the server (see lib/supabase-server.ts).
 
--- Create policy for all authenticated users to manage all users (for demo purposes)
-CREATE POLICY "Users can manage all users"
-  ON users
-  USING (true)
-  WITH CHECK (true);
+-- Create events table for family events and tournaments
+CREATE TABLE events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  date DATE NOT NULL,
+  time TIME NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('Voice Room', 'Tournament', 'Competition', 'Meeting', 'Social')),
+  attendees INTEGER DEFAULT 0,
+  max_attendees INTEGER,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
--- NOTE: For production, you should use Supabase Auth properly!
--- For this demo, we're disabling strict RLS temporarily to avoid recursion
+-- Create applications table for join requests
+CREATE TABLE applications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  weplay_id TEXT NOT NULL UNIQUE,
+  level INTEGER NOT NULL,
+  games TEXT[] NOT NULL,
+  reason TEXT NOT NULL,
+  experience TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending',
+  notes TEXT,
+  submitted_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_events_date ON events(date DESC, time DESC);
+CREATE INDEX idx_applications_status ON applications(status);
 
 -- Insert initial users
 INSERT INTO users (username, display_name, password, role, weplay_id, level, favorite_game, status, badges)
