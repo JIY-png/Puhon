@@ -3,7 +3,6 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthProvider } from "@/components/auth-provider"
-import { getAuthRole } from "@/lib/auth"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -24,12 +23,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const initialRole = await getAuthRole()
-  
   return (
-    <html lang="en" className="bg-background">
-      <body className={`font-sans antialiased`}>
-        <AuthProvider initialRole={initialRole}>
+    <html lang="en" className="bg-background" suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        <AuthProvider>
           {children}
         </AuthProvider>
         <Analytics />

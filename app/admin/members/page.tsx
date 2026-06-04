@@ -49,7 +49,7 @@ import {
   Users,
 } from "lucide-react"
 import type { User, UserRole } from "@/lib/users"
-import { getAllUsers, addUser, editUser, removeUser } from "@/lib/user-actions"
+import { getAllUsers, createUser, editUser, removeUser } from "@/lib/user-actions"
 
 const allRoles: UserRole[] = ["Leader", "Deputies", "Admins", "Members"]
 
@@ -102,7 +102,7 @@ export default function MembersPage() {
 
   const handleAddUser = async () => {
     try {
-      await addUser(newUser)
+      await createUser(newUser)
       // Refresh the list
       const data = await getAllUsers()
       setUsers(data)

@@ -18,23 +18,12 @@ CREATE TABLE users (
 -- Create index on username for faster lookups
 CREATE INDEX idx_users_username ON users(username);
 
--- Enable Row Level Security (RLS)
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+-- Demo app uses custom cookie auth, not Supabase Auth.
+-- RLS with overlapping policies causes infinite recursion (Postgres 42P17) on login.
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 
--- Create policy for all users to view all users (for now)
-CREATE POLICY "Users can view all users"
-  ON users
-  FOR SELECT
-  USING (true);
-
--- Create policy for all authenticated users to manage all users (for demo purposes)
-CREATE POLICY "Users can manage all users"
-  ON users
-  USING (true)
-  WITH CHECK (true);
-
--- NOTE: For production, you should use Supabase Auth properly!
--- For this demo, we're disabling strict RLS temporarily to avoid recursion
+-- For production: enable RLS with Supabase Auth + scoped policies, or use
+-- SUPABASE_SERVICE_ROLE_KEY only on the server (see lib/supabase-server.ts).
 
 -- Insert initial users
 INSERT INTO users (username, display_name, password, role, weplay_id, level, favorite_game, status, badges)

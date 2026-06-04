@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Crown, Image, Lock, Download, Eye, LogIn } from "lucide-react"
+import { Crown, Image, Lock, Download, Eye } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -144,11 +144,9 @@ export default function GalleryPage() {
                   <p className="text-xs text-muted-foreground">by {item.creator}</p>
                   <div className="mt-2">
                     {item.memberOnly ? (
-                      <Button variant="outline" size="sm" className="w-full text-xs h-8" asChild>
-                        <Link href="/login?redirect=/dashboard/gallery">
-                          <LogIn className="w-3 h-3 mr-1" />
-                          Login to Download
-                        </Link>
+                      <Button variant="outline" size="sm" className="w-full text-xs h-8" disabled>
+                        <Lock className="w-3 h-3 mr-1" />
+                        Members Only
                       </Button>
                     ) : (
                       <Button variant="outline" size="sm" className="w-full text-xs h-8">
