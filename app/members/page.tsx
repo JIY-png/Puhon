@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
 import Link from "next/link"
-import type { User, UserRole } from "@/lib/users"
+import type { PublicUser, UserRole } from "@/lib/users"
 import { getPublicUsers } from "@/lib/user-actions"
 
 const allRoles: UserRole[] = ["Leader", "Deputies", "Admins", "Members"]
@@ -26,7 +26,7 @@ const statusConfig = {
 }
 
 export default function MembersPage() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<PublicUser[]>([])
   const [search, setSearch] = useState("")
   const [roleFilter, setRoleFilter] = useState<UserRole | "All">("All")
 
@@ -120,7 +120,7 @@ export default function MembersPage() {
           {filtered.map((user) => {
             const config = roleConfig[user.role]
             const RoleIcon = config.icon
-            const status = statusConfig[user.status || "offline"]
+            const status = statusConfig[(user.status as keyof typeof statusConfig) || "offline"]
             return (
               <Card
                 key={user.id}
@@ -162,7 +162,7 @@ export default function MembersPage() {
                       <Gamepad2 className="w-3 h-3" />
                       {user.favoriteGame || "N/A"}
                     </div>
-                    <span>Since {new Date(user.joinDate).toLocaleDateString()}</span>
+                    <span>Since {user.joinDate ? new Date(user.joinDate).toLocaleDateString() : "N/A"}</span>
                   </div>
 
                   {/* Badges */}

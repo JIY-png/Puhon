@@ -24,7 +24,7 @@ import {
 import { Label } from "@/components/ui/label"
 import {
   UserPlus,
-  Check,
+  CheckCircle2,
   X,
   Clock,
   Eye,
@@ -216,7 +216,7 @@ export default function ApplicationsPage() {
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-green-400/10 p-2">
-                <Check className="h-5 w-5 text-green-400" />
+                <CheckCircle2 className="h-5 w-5 text-green-400" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{approvedCount}</p>
@@ -338,7 +338,7 @@ export default function ApplicationsPage() {
                               handleApprove(application.id, "")
                             }}
                           >
-                            <Check className="h-4 w-4" />
+                            <CheckCircle2 className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
@@ -472,7 +472,7 @@ export default function ApplicationsPage() {
                       className="bg-green-500 hover:bg-green-600 text-white"
                       onClick={() => handleApprove(selectedApplication.id, actionNotes)}
                     >
-                      <Check className="mr-2 h-4 w-4" />
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
                       Approve
                     </Button>
                   </>

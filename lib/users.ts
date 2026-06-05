@@ -1,4 +1,4 @@
-import { getSupabaseServer } from "./supabase-server"
+import { supabase } from "./supabase"
 
 export type UserRole = "Leader" | "Deputies" | "Admins" | "Members"
 
@@ -18,88 +18,93 @@ export interface User {
   updatedAt?: string
 }
 
-function mapUser(row: Record<string, unknown>): User {
-  return {
-    id: row.id as string,
-    username: row.username as string,
-    displayName: row.display_name as string,
-    password: row.password as string,
-    role: row.role as UserRole,
-    weplayId: row.weplay_id as string | undefined,
-    level: row.level as number | undefined,
-    favoriteGame: row.favorite_game as string | undefined,
-    status: row.status as string | undefined,
-    badges: row.badges as string[] | undefined,
-    joinDate: row.join_date as string | undefined,
-    createdAt: row.created_at as string | undefined,
-    updatedAt: row.updated_at as string | undefined,
-  }
-}
-
-function isNotFoundError(error: { code?: string }): boolean {
-  return error.code === "PGRST116"
-}
-
-function formatDbError(error: { code?: string; message?: string }): Error {
-  if (error.code === "42P17") {
-    return new Error(
-      "Database RLS misconfiguration. Run supabase/fix-rls.sql in the Supabase SQL Editor, or set SUPABASE_SERVICE_ROLE_KEY in .env.local."
-    )
-  }
-  return new Error(error.message || "Database request failed")
-}
-
 // Get all users from Supabase
 export async function getUsers(): Promise<User[]> {
-  const { data, error } = await getSupabaseServer()
+  const { data, error } = await supabase
     .from("users")
     .select("*")
     .order("role", { ascending: false })
 
-  if (error) throw formatDbError(error)
+  if (error) throw error
 
-  return (data ?? []).map((row) => mapUser(row))
+  return data.map((user) => ({
+    id: user.id,
+    username: user.username,
+    displayName: user.display_name,
+    password: user.password,
+    role: user.role,
+    weplayId: user.weplay_id,
+    level: user.level,
+    favoriteGame: user.favorite_game,
+    status: user.status,
+    badges: user.badges,
+    joinDate: user.join_date,
+    createdAt: user.created_at,
+    updatedAt: user.updated_at,
+  }))
 }
 
 // Get user by ID
 export async function getUserById(id: string): Promise<User | null> {
-  const { data, error } = await getSupabaseServer()
+  const { data, error } = await supabase
     .from("users")
     .select("*")
     .eq("id", id)
-    .maybeSingle()
+    .single()
 
-  if (error) {
-    if (isNotFoundError(error)) return null
-    throw formatDbError(error)
-  }
+  if (error) throw error
 
   if (!data) return null
 
-  return mapUser(data)
+  return {
+    id: data.id,
+    username: data.username,
+    displayName: data.display_name,
+    password: data.password,
+    role: data.role,
+    weplayId: data.weplay_id,
+    level: data.level,
+    favoriteGame: data.favorite_game,
+    status: data.status,
+    badges: data.badges,
+    joinDate: data.join_date,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  }
 }
 
 // Get user by username
 export async function getUserByUsername(username: string): Promise<User | null> {
-  const { data, error } = await getSupabaseServer()
+  const { data, error } = await supabase
     .from("users")
     .select("*")
     .eq("username", username)
-    .maybeSingle()
+    .single()
 
-  if (error) {
-    if (isNotFoundError(error)) return null
-    throw formatDbError(error)
-  }
+  if (error) throw error
 
   if (!data) return null
 
-  return mapUser(data)
+  return {
+    id: data.id,
+    username: data.username,
+    displayName: data.display_name,
+    password: data.password,
+    role: data.role,
+    weplayId: data.weplay_id,
+    level: data.level,
+    favoriteGame: data.favorite_game,
+    status: data.status,
+    badges: data.badges,
+    joinDate: data.join_date,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  }
 }
 
 // Add new user
 export async function addUser(user: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<User> {
-  const { data, error } = await getSupabaseServer()
+  const { data, error } = await supabase
     .from("users")
     .insert({
       username: user.username,
@@ -116,9 +121,23 @@ export async function addUser(user: Omit<User, "id" | "createdAt" | "updatedAt">
     .select()
     .single()
 
-  if (error) throw formatDbError(error)
+  if (error) throw error
 
-  return mapUser(data)
+  return {
+    id: data.id,
+    username: data.username,
+    displayName: data.display_name,
+    password: data.password,
+    role: data.role,
+    weplayId: data.weplay_id,
+    level: data.level,
+    favoriteGame: data.favorite_game,
+    status: data.status,
+    badges: data.badges,
+    joinDate: data.join_date,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  }
 }
 
 // Update user
@@ -126,7 +145,7 @@ export async function updateUser(
   id: string,
   userData: Partial<Omit<User, "id" | "createdAt" | "updatedAt">>
 ): Promise<User> {
-  const { data, error } = await getSupabaseServer()
+  const { data, error } = await supabase
     .from("users")
     .update({
       username: userData.username,
@@ -145,9 +164,23 @@ export async function updateUser(
     .select()
     .single()
 
-  if (error) throw formatDbError(error)
+  if (error) throw error
 
-  return mapUser(data)
+  return {
+    id: data.id,
+    username: data.username,
+    displayName: data.display_name,
+    password: data.password,
+    role: data.role,
+    weplayId: data.weplay_id,
+    level: data.level,
+    favoriteGame: data.favorite_game,
+    status: data.status,
+    badges: data.badges,
+    joinDate: data.join_date,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  }
 }
 
 // Verify credentials for login
@@ -160,6 +193,7 @@ export async function verifyCredentials(
   if (!user) return null
 
   // NOTE: In production, you should hash passwords with bcrypt!
+  // For demo purposes, we're checking plain text
   if (user.password === password) {
     return user
   }
@@ -169,6 +203,6 @@ export async function verifyCredentials(
 
 // Delete user
 export async function deleteUser(id: string): Promise<void> {
-  const { error } = await getSupabaseServer().from("users").delete().eq("id", id)
-  if (error) throw formatDbError(error)
+  const { error } = await supabase.from("users").delete().eq("id", id)
+  if (error) throw error
 }
